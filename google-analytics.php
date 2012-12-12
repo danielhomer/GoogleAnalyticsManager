@@ -2,12 +2,15 @@
 
 class GoogleAnalytics {
 
-	var $accountTableName;
-	var $currentAccount;
+	protected $accountTableName;
+	protected $currentAccount;
 
+	/**
+	 * Set up the menus, check if the database table exists, configure the variables and
+	 * check for any new submissions.
+	 */
 	public function __construct() {
 		global $wpdb;
-		$wpdb->show_errors();
 		
 		add_action( 'admin_menu', array( &$this, 'addSettingsSection' ) );
 		add_action( 'admin_init', array( &$this, 'registerSettings' ) );
@@ -57,14 +60,14 @@ class GoogleAnalytics {
 		}
 		settings_fields( 'google-analytics-settings-group' );
 		echo "<table style='width:80%' cellspacing='0'><tr style='height:30px; background-color:#efefef; font-weight:bold;'><td></td><td>ID</td><td>Portfolio</td><td>Email</td><td>Analytics ID</td><td width='25'></td></tr>";
-		if ( ! $this->currentAccount ) {
+		if ( ! $this->currentAccount && $accounts ) {
 			echo '<tr><td><input type="radio" name="current_account_id" checked="1" value="' . $accounts[0]["id"] . '" /><td> ' . $accounts[0]["id"] . '</td><td>' . $accounts[0]["portfolio"] . "</td><td>" . $accounts[0]["email"] . "</td><td>" . $accounts[0]["ga_id"] . "</td><td></td></tr>";
 			$skip = 1;
 		}
 		foreach ( $accounts as $account ) {
 			if ( $this->currentAccount == $account["id"] )
 				$checked = 'checked="checked"';
-			if ( ! $skip )
+			if ( ! $skip && $accounts )
 				echo '<tr><td><input type="radio" name="current_account_id" value="' . $account["id"] . '" ' . $checked . ' /><td> ' . $account["id"] . '</td><td>' . $account["portfolio"] . "</td><td>" . $account["email"] . "</td><td>" . $account["ga_id"] . "</td><td></td></tr>";
 			$checked = '';
 			$skip = 0;
@@ -208,7 +211,7 @@ class GoogleAnalytics {
 	 * Echo out the Google Analytics tracking script
 	 * @return string The tracking script
 	 */
-	public function outputGoogleAnalyticsScript() {
+	public function outputJavascript() {
 		if ( $this->currentAccount === '' )
 			echo '<!-- No GA Account Specified -->';
 
