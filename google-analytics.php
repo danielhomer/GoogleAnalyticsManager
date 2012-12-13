@@ -54,7 +54,6 @@ class GoogleAnalytics {
 	 */
 	public function validatePortfolio( $data ) {
 		if ( ! strlen( $data ) ) {
-			add_settings_error( 'add_portfolio', 0, "Google Analytics: Please enter a portfolio", 'error' );
 			return false;
 		}
 		return $data;
@@ -67,7 +66,6 @@ class GoogleAnalytics {
 	 */
 	public function ValidateEmail( $data ) {
 		if ( ! strlen( $data ) ) {
-			add_settings_error( 'add_email', 0, "Google Analytics: Please enter an email address", 'error' );
 			return false;
 		} elseif ( ! preg_match( "/^[a-z0-9]+([_\\.-][a-z0-9]+)*@([a-z0-9]+([\.-][a-z0-9]+)*)+\\.[a-z]{2,}$/i", $data ) ) {
 			add_settings_error( 'add_email', 1, "Google Analytics: The email address you entered was invalid, valid email addresses should be in the format 'someone@somewhere.com'", 'error' );
@@ -82,11 +80,15 @@ class GoogleAnalytics {
 	 * @return string|bool  If valid, return the input data. If invalid, return false
 	 */
 	public function ValidateGaId( $data ) {
+		global $wpdb;
+
 		if ( ! strlen( $data ) ) {
-			add_settings_error( 'add_gaid', 0, "Google Analytics: Please enter an analytics ID", 'error' );
 			return false;
 		} elseif ( ! preg_match( '/UA-[0-9]{5,}-[0-9]{1,}/', $data ) ) {
 			add_settings_error( 'add_gaid', 1, "Google Analytics: The analytics ID you entered was invalid, valid IDs should be in the format 'UA-XXXXXXXXXX'", 'error' );
+			return false;
+		} elseif ( $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $this->accountTableName WHERE ga_id = %s", $data ) ) ) {
+			add_settings_error( 'add_gaid', 2, "Google Analytics: ID already exists", 'error' );
 			return false;
 		}
 		return $data;
