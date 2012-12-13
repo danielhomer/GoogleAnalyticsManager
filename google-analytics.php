@@ -35,9 +35,9 @@ class GoogleAnalytics {
 	 */
 	public function registerSettings() {
 		register_setting( 'google-analytics-settings-group', 'current_account_id', 'intval' ); 
-		register_setting( 'google-analytics-settings-group', 'add_portfolio'); 
-		register_setting( 'google-analytics-settings-group', 'add_email'); 
-		register_setting( 'google-analytics-settings-group', 'add_gaid'); 
+		register_setting( 'google-analytics-settings-group', 'add_portfolio', array( $this, 'validatePortfolio' ) ); 
+		register_setting( 'google-analytics-settings-group', 'add_email', array( $this, 'validateEmail' ) ); 
+		register_setting( 'google-analytics-settings-group', 'add_gaid', array( $this, 'ValidateGaId' ) ); 
 	}
 
 	/**
@@ -45,6 +45,51 @@ class GoogleAnalytics {
 	 */
 	public function addSettingsSection() {
 		add_settings_section( 'google-analytics', 'Google Analytics', array( &$this, 'settingsSectionContent' ), 'general' );
+	}
+
+	/**
+	 * Make sure the portfolio text isn't empty when adding a new account
+	 * @param  string $data The data to validate
+	 * @return string|bool  If valid, return the input data. If invalid, return false
+	 */
+	public function validatePortfolio( $data ) {
+		if ( ! strlen( $data ) ) {
+			add_settings_error( 'add_portfolio', 0, "Google Analytics: Please enter a portfolio", 'error' );
+			return false;
+		}
+		return $data;
+	}
+
+	/**
+	 * Make sure the email isn't blank and is in the correct format when adding a new account
+	 * @param string $data The data to validate
+	 * @return string|bool If valid, return the input data. If invalid, return false
+	 */
+	public function ValidateEmail( $data ) {
+		if ( ! strlen( $data ) ) {
+			add_settings_error( 'add_email', 0, "Google Analytics: Please enter an email address", 'error' );
+			return false;
+		} elseif ( ! preg_match( "/^[a-z0-9]+([_\\.-][a-z0-9]+)*@([a-z0-9]+([\.-][a-z0-9]+)*)+\\.[a-z]{2,}$/i", $data ) ) {
+			add_settings_error( 'add_email', 1, "Google Analytics: The email address you entered was invalid, valid email addresses should be in the format 'someone@somewhere.com'", 'error' );
+			return false;
+		}
+		return $data;
+	}
+
+	/**
+	 * Make sure the Google Analytics ID isn't blank and is in the correct format when adding a new account
+	 * @param string $data The data to validate
+	 * @return string|bool  If valid, return the input data. If invalid, return false
+	 */
+	public function ValidateGaId( $data ) {
+		if ( ! strlen( $data ) ) {
+			add_settings_error( 'add_gaid', 0, "Google Analytics: Please enter an analytics ID", 'error' );
+			return false;
+		} elseif ( ! preg_match( '/UA-[0-9]{5,}-[0-9]{1,}/', $data ) ) {
+			add_settings_error( 'add_gaid', 1, "Google Analytics: The analytics ID you entered was invalid, valid IDs should be in the format 'UA-XXXXXXXXXX'", 'error' );
+			return false;
+		}
+		return $data;
 	}
 
 	/**
@@ -56,21 +101,27 @@ class GoogleAnalytics {
 		try {
 			$accounts = $this->getAccounts();
 		} catch ( Exception $e ) {
-			echo $e->getMessage();
+			if ( stristr( $e->getMessage(), 'Unknown error' ) ) {
+				echo new WP_Error( 'google_analytics', 'An unknown error occurred with the Google Analytics script' );
+			} else {
+				echo '<div style="padding: 0 0 10px 0">' . $e->getMessage() . '</div>';
+			}
 		}
 		settings_fields( 'google-analytics-settings-group' );
 		echo "<table style='width:80%' cellspacing='0'><tr style='height:30px; background-color:#efefef; font-weight:bold;'><td></td><td>ID</td><td>Portfolio</td><td>Email</td><td>Analytics ID</td><td width='25'></td></tr>";
 		if ( ! $this->currentAccount && $accounts ) {
-			echo '<tr><td><input type="radio" name="current_account_id" checked="1" value="' . $accounts[0]["id"] . '" /><td> ' . $accounts[0]["id"] . '</td><td>' . $accounts[0]["portfolio"] . "</td><td>" . $accounts[0]["email"] . "</td><td>" . $accounts[0]["ga_id"] . "</td><td></td></tr>";
+			echo '<tr style="height:30px;"><td><input type="radio" name="current_account_id" checked="1" value="' . $accounts[0]["id"] . '" /><td> ' . $accounts[0]["id"] . '</td><td>' . $accounts[0]["portfolio"] . "</td><td>" . $accounts[0]["email"] . "</td><td>" . $accounts[0]["ga_id"] . "</td><td></td></tr>";
 			$skip = 1;
 		}
-		foreach ( $accounts as $account ) {
-			if ( $this->currentAccount == $account["id"] )
-				$checked = 'checked="checked"';
-			if ( ! $skip && $accounts )
-				echo '<tr><td><input type="radio" name="current_account_id" value="' . $account["id"] . '" ' . $checked . ' /><td> ' . $account["id"] . '</td><td>' . $account["portfolio"] . "</td><td>" . $account["email"] . "</td><td>" . $account["ga_id"] . "</td><td></td></tr>";
-			$checked = '';
-			$skip = 0;
+		if ( $accounts ) {
+			foreach ( $accounts as $account ) {
+				if ( $this->currentAccount == $account["id"] )
+					$checked = 'checked="checked"';
+				if ( ! $skip && $accounts )
+					echo '<tr style="height:30px;"><td><input type="radio" name="current_account_id" value="' . $account["id"] . '" ' . $checked . ' /><td> ' . $account["id"] . '</td><td>' . $account["portfolio"] . "</td><td>" . $account["email"] . "</td><td>" . $account["ga_id"] . "</td><td></td></tr>";
+				$checked = '';
+				$skip = 0;
+			}
 		}
 		echo '<tr><td></td><td></td><td><input style="width:90%" name="add_portfolio" id="add_portfolio" value="" tabindex="100"></input></td><td><input style="width:90%" name="add_email" id="add_email" value="" tabindex="101"></input></td><td><input style="width:90%" name="add_gaid" id="add_gaid" value="" tabindex="102"></input></td><td><input style="padding: 4px;border-radius: 12px;width: 25px;height: 25px;background-color: #EFEFEF;cursor: pointer;" type="submit" value="+" /></td></tr>';
 		echo "</table>";
@@ -88,12 +139,8 @@ class GoogleAnalytics {
 		if ( strlen( $addPortfolio ) == 0 || strlen( $addEmail ) == 0 || strlen( $addGaId ) == 0 )
 			return false;
 
-		try {
-			$this->addAccount( $addPortfolio, $addEmail, $addGaId );
-		} catch ( Exception $e ) {
-			echo $e->getMessage();
-		}
-
+		$this->addAccount( $addPortfolio, $addEmail, $addGaId );
+		
 		update_option( 'add_portfolio', '' );
 		update_option( 'add_email', '' );
 		update_option( 'add_gaid', '' );
@@ -143,13 +190,18 @@ class GoogleAnalytics {
 	 */
 	private function addAccount( $portfolio, $email, $ga_id ) {
 		global $wpdb;
+
 		$data = array(
 			"portfolio" => $portfolio,
 			"email" => $email,
 			"ga_id" => $ga_id
 			);
+
 		if ( ! $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $this->accountTableName WHERE ga_id = %s", $ga_id ) ) );
-			$wpdb->insert($this->accountTableName, $data);
+			$insert = $wpdb->insert($this->accountTableName, $data);
+
+		if ( is_int( $insert ) )
+			return true;
 	}
 
 	/**
@@ -161,9 +213,9 @@ class GoogleAnalytics {
 		global $wpdb;
 		$query = $wpdb->get_results( "SELECT * FROM $this->accountTableName LIMIT 0, 1000" );
 		if ( empty( $query ) )
-			throw new Exception( "No accounts" );
+			throw new Exception( "No accounts, please add one using the input boxes below" );
 
-		$i = 1;
+		$i = 0;
 		$accounts = array();
 		foreach ( $query as $entry ) {
 			$accounts[$i]["id"] = $entry->id;
