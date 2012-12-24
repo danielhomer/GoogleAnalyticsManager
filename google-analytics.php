@@ -1,6 +1,6 @@
 <?php 
 
-class GoogleAnalytics {
+class Google_Analytics {
 
 	protected $account_table_name;
 	protected $current_account;
@@ -203,7 +203,7 @@ class GoogleAnalytics {
 			);
 
 		if ( ! $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $this->account_table_name WHERE ga_id = %s", $ga_id ) ) );
-			$insert = $wpdb->insert($this->account_table_name, $data);
+			$insert = $wpdb->insert( $this->account_table_name, $data );
 
 		if ( is_int( $insert ) )
 			return true;
