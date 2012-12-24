@@ -178,8 +178,8 @@ class Google_Analytics {
 		global $wpdb;
 		
 		$query = $wpdb->query( "CREATE TABLE $this->account_table_name (`id` INT NOT NULL AUTO_INCREMENT , `portfolio` VARCHAR(45) NULL , `email` VARCHAR(45) NULL , `ga_id` VARCHAR(45) NULL , PRIMARY KEY (`id`) )" );
-		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-		dbDelta($query);
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $query );
 
 		if ( ! $this->table_exists( $table_name ) )
 			throw new Exception( "Couldn't create the account table" );
