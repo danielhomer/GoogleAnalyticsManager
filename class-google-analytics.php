@@ -34,10 +34,10 @@ class Google_Analytics {
 	 * @return void
 	 */
 	public function register_settings() {
-		register_setting( 'google-analytics-settings-group', 'current_account_id', 'intval' ); 
-		register_setting( 'google-analytics-settings-group', 'add_portfolio', array( $this, 'validate_portfolio' ) ); 
-		register_setting( 'google-analytics-settings-group', 'add_email', array( $this, 'validate_email' ) ); 
-		register_setting( 'google-analytics-settings-group', 'add_gaid', array( $this, 'validate_ga_id' ) ); 
+		register_setting( 'general', 'current_account_id', 'intval' ); 
+		register_setting( 'general', 'add_portfolio', array( $this, 'validate_portfolio' ) ); 
+		register_setting( 'general', 'add_email', array( $this, 'validate_email' ) ); 
+		register_setting( 'general', 'add_gaid', array( $this, 'validate_ga_id' ) ); 
 	}
 
 	/**
@@ -112,7 +112,6 @@ class Google_Analytics {
 				echo '<div style="padding: 0 0 10px 0">' . $e->getMessage() . '</div>';
 			}
 		}
-		settings_fields( 'google-analytics-settings-group' );
 		echo "<table style='width:80%' cellspacing='0'><tr style='height:30px; background-color:#efefef; font-weight:bold;'><td></td><td>ID</td><td>Portfolio</td><td>Email</td><td>Analytics ID</td><td width='25'></td></tr>";
 		if ( ! $this->current_account && $accounts ) {
 			echo '<tr style="height:30px;"><td><input type="radio" name="current_account_id" checked="1" value="' . $accounts[0]["id"] . '" /><td> ' . $accounts[0]["id"] . '</td><td>' . $accounts[0]["portfolio"] . "</td><td>" . $accounts[0]["email"] . "</td><td>" . $accounts[0]["ga_id"] . "</td><td></td></tr>";
