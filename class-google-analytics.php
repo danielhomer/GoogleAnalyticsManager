@@ -272,8 +272,6 @@ class Google_Analytics {
 		if ( $this->current_account === '' )
 			echo '<!-- No GA Account Specified -->';
 
-		echo 'CurrentID: ' . $this->get_current_account_id();
-
 		echo "<script type='text/javascript'>
 
 			    var _gaq = _gaq || [];
