@@ -276,7 +276,7 @@ class Google_Analytics {
 
 			    var _gaq = _gaq || [];
 			    _gaq.push(['_setAccount', '" . $this->get_current_account_id() . "']);
-			    _gaq.push(['_setDomainName', '" . get_bloginfo( 'url' ) . "']);
+			    _gaq.push(['_setDomainName', '" . preg_replace( "`^http://`is", "", get_bloginfo( 'url' ) ) . "']);
 			    _gaq.push(['_setAllowLinker', true]);
 			    _gaq.push(['_trackPageview']);
 			    _gaq.push(['_setCustomVar', 1, 'NTUserName', '" . $this->get_logged_in_username() . "', 1]);
