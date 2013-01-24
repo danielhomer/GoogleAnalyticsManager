@@ -270,7 +270,6 @@ class Google_Analytics {
 	public function output_javascript() {
 		$account_id = $this->get_current_account_id();
 		$domain_name = preg_replace( "`^http://`is", "", get_bloginfo( 'url' ) );
-		$logged_in_user = $this->get_logged_in_username();
 
 		if ( $this->current_account === '' )
 			echo '<!-- No GA Account Specified -->';
@@ -282,13 +281,11 @@ class Google_Analytics {
 			    _gaq.push(['_setDomainName', '" . $domain_name . "']);
 			    _gaq.push(['_setAllowLinker', true]);
 			    _gaq.push(['_trackPageview']);
-			    _gaq.push(['_setCustomVar', 1, 'NTUserName', '" . $logged_in_user . "', 1]);
 
 			    _gaq.push(['b._setAccount', 'UA-36593358-1']);
 			    _gaq.push(['b._setDomainName', '" . $domain_name . "']);
 			    _gaq.push(['b._setAllowLinker', true]);
 			    _gaq.push(['b._trackPageview']);
-			    _gaq.push(['b._setCustomVar', 1, 'NTUserName', '" . $logged_in_user . "', 1]);
 
 			    (function() {
 			        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
