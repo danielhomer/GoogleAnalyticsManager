@@ -241,7 +241,9 @@ class Google_Analytics {
 	 */
 	private function get_current_account_id() {
 		global $wpdb;
-		$current_ga_id = $wpdb->get_var( "SELECT ga_id FROM $this->account_table_name WHERE id = $this->current_account" );
+
+		if ( $this->current_account )
+			$current_ga_id = $wpdb->get_var( "SELECT ga_id FROM $this->account_table_name WHERE id = $this->current_account" );
 		
 		if ( ! $current_ga_id )
 			return 'Error';
